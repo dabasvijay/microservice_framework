@@ -153,18 +153,24 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
+
     <build>
         <plugins>
             <plugin>
-                <groupId>uk.gov.justice.maven</groupId>
-                <artifactId>raml-maven-plugin</artifactId>
-                <version>${raml-maven-plugin.version}</version>
+                <groupId>uk.gov.justice.maven.generator</groupId>
+                <artifactId>generator-plugin</artifactId>
+                <version>${generator-maven-plugin.version}</version>
                 <configuration>
                     <generatorName>uk.gov.justice.raml.jms.core.JmsEndpointGenerator</generatorName>
+                    <parserName>uk.gov.justice.maven.generator.io.files.parser.RamlFileParser
+                    </parserName>
                     <sourceDirectory>${basedir}/src/test/resources/raml</sourceDirectory>
                     <outputDirectory>${project.build.directory}/generated-test-sources
                     </outputDirectory>
                     <basePackageName>uk.gov.justice.api</basePackageName>
+                    <generatorProperties
+                            implementation="uk.gov.justice.services.generators.commons.config.CommonGeneratorProperties">
+                    </generatorProperties>
                 </configuration>
                 <executions>
                     <execution>
@@ -270,11 +276,20 @@
                         <version>${javaee-api.version}</version>
                         <scope>runtime</scope>
                     </dependency>
+                    <dependency>
+                        <groupId>uk.gov.justice.maven.generator</groupId>
+                        <artifactId>raml-parser</artifactId>
+                        <version>${generator-maven-plugin.version}</version>
+                    </dependency>
                 </dependencies>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-failsafe-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
                     <systemPropertyVariables>
                         <random.jms.port>${random-jms-port}</random.jms.port>

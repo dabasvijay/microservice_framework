@@ -14,11 +14,14 @@ import static uk.gov.justice.raml.jms.core.MediaTypesUtil.containsGeneralJsonMim
 import static uk.gov.justice.raml.jms.core.MediaTypesUtil.mediaTypesFrom;
 import static uk.gov.justice.services.generators.commons.helper.Names.namesListStringFrom;
 
+import uk.gov.justice.maven.generator.io.files.parser.core.GeneratorConfig;
+import uk.gov.justice.services.adapter.messaging.EventListenerValidationInterceptor;
 import uk.gov.justice.services.adapter.messaging.JmsLoggerMetadataInterceptor;
 import uk.gov.justice.services.adapter.messaging.JmsProcessor;
 import uk.gov.justice.services.adapter.messaging.JsonSchemaValidationInterceptor;
 import uk.gov.justice.services.core.annotation.Adapter;
 import uk.gov.justice.services.core.interceptor.InterceptorChainProcessor;
+import uk.gov.justice.services.generators.commons.config.CommonGeneratorProperties;
 import uk.gov.justice.services.generators.commons.config.GeneratorPropertyParser;
 import uk.gov.justice.services.generators.commons.helper.MessagingAdapterBaseUri;
 import uk.gov.justice.services.generators.commons.helper.MessagingResourceUri;
@@ -162,6 +165,12 @@ class MessageListenerCodeGenerator {
 
     private String poolNameFrom(final MessagingResourceUri resourceUri, final String component) {
         return format("%s-%s-pool", resourceUri.hyphenated(), component.toLowerCase().replace("_", "-"));
+    }
+
+    private boolean shouldAddCustomPoolConfiguration(final GeneratorConfig configuration) {
+        CommonGeneratorProperties properties = (CommonGeneratorProperties)configuration
+                .getGeneratorProperties();
+        return TRUE.equalsIgnoreCase(properties.getCustomMDBPool());
     }
 
     /**

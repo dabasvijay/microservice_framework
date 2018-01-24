@@ -1,6 +1,5 @@
 package uk.gov.justice.raml.jms.core;
 
-import static java.util.Collections.emptyMap;
 import static org.raml.model.ActionType.POST;
 import static uk.gov.justice.services.core.annotation.Component.EVENT_LISTENER;
 import static uk.gov.justice.services.core.annotation.Component.QUERY_API;
@@ -10,6 +9,7 @@ import static uk.gov.justice.services.generators.test.utils.builder.ResourceBuil
 import static uk.gov.justice.services.generators.test.utils.config.GeneratorConfigUtil.configurationWithBasePackage;
 import static uk.gov.justice.services.generators.test.utils.config.GeneratorPropertiesBuilder.generatorProperties;
 
+import uk.gov.justice.services.generators.commons.config.CommonGeneratorProperties;
 import uk.gov.justice.services.generators.commons.config.GeneratorProperties;
 import uk.gov.justice.services.generators.commons.validator.RamlValidationException;
 import uk.gov.justice.services.generators.test.utils.BaseGeneratorTest;
@@ -39,7 +39,7 @@ public class JmsEndpointGeneratorErrorHandlingTest extends BaseGeneratorTest {
 
         generator.run(
                 raml().build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, new CommonGeneratorProperties()));
     }
 
     @Test
@@ -53,7 +53,7 @@ public class JmsEndpointGeneratorErrorHandlingTest extends BaseGeneratorTest {
                         .with(resource()
                                 .withRelativeUri("/structure.controller.command"))
                         .build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, new CommonGeneratorProperties()));
     }
 
     @Test
@@ -67,7 +67,7 @@ public class JmsEndpointGeneratorErrorHandlingTest extends BaseGeneratorTest {
                         .with(resource()
                                 .with(httpAction().withHttpActionType(POST)))
                         .build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, new CommonGeneratorProperties()));
     }
 
     @Test
@@ -82,7 +82,7 @@ public class JmsEndpointGeneratorErrorHandlingTest extends BaseGeneratorTest {
                                 .withRelativeUri("/structure.event")
                                 .withDefaultPostAction())
                         .build(),
-                configurationWithBasePackage("uk.somepackage", outputFolder, emptyMap()));
+                configurationWithBasePackage("uk.somepackage", outputFolder, new CommonGeneratorProperties()));
     }
 
     @Test
@@ -97,7 +97,7 @@ public class JmsEndpointGeneratorErrorHandlingTest extends BaseGeneratorTest {
                                 .withRelativeUri("/structure.event")
                                 .withDefaultPostAction())
                         .build(),
-                configurationWithBasePackage("uk.somepackage", outputFolder, emptyMap()));
+                configurationWithBasePackage("uk.somepackage", outputFolder, new CommonGeneratorProperties()));
     }
 
     @Test

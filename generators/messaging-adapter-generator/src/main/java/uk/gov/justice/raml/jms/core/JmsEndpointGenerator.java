@@ -31,7 +31,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Generates JMS endpoint classes out of RAML object
  */
-public class JmsEndpointGenerator implements Generator {
+public class JmsEndpointGenerator implements Generator<Raml> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(JmsEndpointGenerator.class);
     private final MessageListenerCodeGenerator messageListenerCodeGenerator = new MessageListenerCodeGenerator();
