@@ -6,6 +6,7 @@ import static java.util.UUID.randomUUID;
 import static javax.json.Json.createArrayBuilder;
 import static javax.json.Json.createObjectBuilder;
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.allOf;
 import static org.mockito.Matchers.argThat;
@@ -24,6 +25,8 @@ import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopePaylo
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeStreamMatcher.streamContaining;
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataOf;
 
+import uk.gov.justice.services.common.converter.ObjectToJsonValueConverter;
+import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.core.aggregate.AggregateService;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.eventsourcing.source.core.EventSource;
@@ -34,7 +37,9 @@ import uk.gov.justice.services.example.cakeshop.domain.event.RecipeAdded;
 import uk.gov.justice.services.example.cakeshop.domain.event.RecipePhotographAdded;
 import uk.gov.justice.services.example.cakeshop.domain.event.RecipeRemoved;
 import uk.gov.justice.services.example.cakeshop.domain.event.RecipeRenamed;
+import uk.gov.justice.services.messaging.Envelope;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.justice.services.messaging.Metadata;
 
 import java.util.UUID;
 
@@ -69,6 +74,9 @@ public class RecipeCommandHandlerTest {
 
     @Mock
     private AggregateService aggregateService;
+
+    @Mock
+    ObjectToJsonValueConverter objectToJsonValueConverter = new ObjectToJsonValueConverter(new ObjectMapperProducer().objectMapper());
 
     @Spy
     private Enveloper enveloper = createEnveloperWithEvents(RecipeAdded.class, RecipeRenamed.class, RecipeRemoved.class, RecipePhotographAdded.class);
@@ -123,19 +131,25 @@ public class RecipeCommandHandlerTest {
 
     @Test
     public void shouldHandleRenameRecipeCommand() throws Exception {
-        final UUID commandId = randomUUID();
 
-        final JsonEnvelope command = envelopeFrom(
-                metadataOf(commandId, RENAME_RECIPE_COMMAND_NAME),
-                createObjectBuilder()
-                        .add("recipeId", RECIPE_ID.toString())
-                        .add("name", RECIPE_NAME)
-                        .build());
+        RenameRecipe renameRecipe = new RenameRecipe(RECIPE_ID.toString(), RECIPE_NAME);
+
+        Metadata metadata = JsonEnvelope.metadataBuilder()
+                .withName("Name")
+                .withId(UUID.randomUUID())
+                .withClientCorrelationId("asdsfd")
+                .build();
+
+        Envelope<RenameRecipe> command = new LocalDefaultNewEnvelope<>(metadata, renameRecipe);
 
         when(eventSource.getStreamById(RECIPE_ID)).thenReturn(eventStream);
         when(aggregateService.get(eventStream, Recipe.class)).thenReturn(existingRecipe());
-
+        System.out.println("Before Command: "+ command.payload().getName());
         recipeCommandHandler.renameRecipe(command);
+
+        System.out.println("After  Command: "+ command.payload().getName());
+
+        assertThat(command.payload().getName(), is(RECIPE_NAME));
 
         verify(eventStream).append(
                 argThat(streamContaining(
@@ -147,6 +161,7 @@ public class RecipeCommandHandlerTest {
                                         withJsonPath("$.name", equalTo(RECIPE_NAME))
                                 ))).thatMatchesSchema()
                 )), eq(Tolerance.NON_CONSECUTIVE));
+
     }
 
     @Test
@@ -212,4 +227,29 @@ public class RecipeCommandHandlerTest {
         recipe.apply(new RecipeAdded(RECIPE_ID, RECIPE_NAME, GULTEN_FREE, emptyList()));
         return recipe;
     }
+
+
+    class LocalDefaultNewEnvelope<T> implements Envelope<T> {
+
+        private final Metadata metadata;
+
+        private final T payload;
+
+        LocalDefaultNewEnvelope(final Metadata metadata, final T payload) {
+            this.metadata = metadata;
+            this.payload = payload;
+        }
+
+        @Override
+        public Metadata metadata() {
+            return metadata;
+        }
+
+        @Override
+        public T payload() {
+            return payload;
+        }
+
+    }
+
 }

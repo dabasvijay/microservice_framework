@@ -52,6 +52,11 @@ public class DefaultEnveloperTest {
     }
 
     @Test
+    public void shouldEnvelopeEventObt() throws JsonProcessingException {
+        Enveloper defaultEnveloper =  new DefaultEnveloper();
+    }
+
+    @Test
     public void shouldEnvelopeEventObject() throws JsonProcessingException {
         enveloper.register(new EventFoundEvent(TestEvent.class, TEST_EVENT_NAME));
 

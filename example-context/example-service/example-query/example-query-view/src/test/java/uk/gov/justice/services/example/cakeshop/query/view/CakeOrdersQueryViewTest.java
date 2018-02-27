@@ -11,6 +11,8 @@ import static uk.gov.justice.services.test.utils.core.messaging.JsonEnvelopeBuil
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithDefaults;
 
 import uk.gov.justice.services.core.enveloper.Enveloper;
+import uk.gov.justice.services.core.enveloper.Enveloper;
+import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.example.cakeshop.query.view.response.CakeOrderView;
 import uk.gov.justice.services.example.cakeshop.query.view.service.CakeOrderService;
 import uk.gov.justice.services.messaging.JsonEnvelope;
@@ -46,6 +48,23 @@ public class CakeOrdersQueryViewTest {
 
     @Test
     public void shouldReturnOrder() {
+
+        final UUID orderId = UUID.randomUUID();
+        final UUID recipeId = UUID.randomUUID();
+        final ZonedDateTime deliveryDate = ZonedDateTime.now();
+
+        when(service.findOrder(orderId.toString())).thenReturn(new CakeOrderView(orderId, recipeId, deliveryDate));
+
+        final JsonEnvelope response = queryView.findOrder(
+                envelope().with(metadataWithDefaults())
+                        .withPayloadOf(orderId.toString(), "orderId").build());
+
+        assertThat(response.payloadAsJsonObject().getString("orderId"), equalTo(orderId.toString()));
+        assertThat(response.payloadAsJsonObject().getString("recipeId"), equalTo(recipeId.toString()));
+    }
+
+    @Test
+    public void shouldReturnPojoOrder() {
 
         final UUID orderId = UUID.randomUUID();
         final UUID recipeId = UUID.randomUUID();

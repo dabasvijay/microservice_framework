@@ -12,7 +12,7 @@ public class DefaultEnvelope <T> implements Envelope<T> {
 
     private final T payload;
 
-    DefaultEnvelope(final Metadata metadata, final T payload) {
+    public DefaultEnvelope(final Metadata metadata, final T payload) {
         this.metadata = metadata;
         this.payload = payload;
     }

@@ -15,9 +15,11 @@ import uk.gov.justice.services.common.converter.ZonedDateTimes;
 import uk.gov.justice.services.common.util.Clock;
 import uk.gov.justice.services.core.enveloper.exception.InvalidEventException;
 import uk.gov.justice.services.core.extension.EventFoundEvent;
+import uk.gov.justice.services.messaging.Envelope;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.JsonObjects;
 import uk.gov.justice.services.messaging.Metadata;
+import uk.gov.justice.services.messaging.spi.DefaultEnvelope;
 
 import java.util.Arrays;
 import java.util.UUID;
@@ -41,11 +43,11 @@ import javax.json.JsonValue;
 @ApplicationScoped
 public class DefaultEnveloper implements Enveloper {
 
-    Clock clock;
+    static Clock clock;
 
-    ObjectToJsonValueConverter objectToJsonValueConverter;
+    static ObjectToJsonValueConverter objectToJsonValueConverter;
 
-    DefaultEnveloper() {
+    public DefaultEnveloper() {
     }
 
     @Inject
@@ -54,7 +56,7 @@ public class DefaultEnveloper implements Enveloper {
         this.objectToJsonValueConverter = objectToJsonValueConverter;
     }
 
-    private ConcurrentHashMap<Class<?>, String> eventMap = new ConcurrentHashMap<>();
+    private static ConcurrentHashMap<Class<?>, String> eventMap = new ConcurrentHashMap<>();
 
     /**
      * Register method, invoked automatically to register all event classes into the eventMap.
@@ -73,7 +75,16 @@ public class DefaultEnveloper implements Enveloper {
         return x -> envelopeFrom(buildMetaData(envelope.metadata(), name), x == null ? JsonValue.NULL : objectToJsonValueConverter.convert(x));
     }
 
-    private Metadata buildMetaData(final Object eventObject, final Metadata metadata) {
+    public Function<Object, JsonEnvelope> toEnvelopeWithMetadataFrom(final Envelope<?> envelope) {
+        return x -> envelopeFrom(buildMetaData(x, envelope.metadata()), objectToJsonValueConverter.convert(envelope.payload()));
+    }
+
+    public <T> EnveloperBuilder<T> envelop(final T payload) {
+        return new DefaultEnveloperBuilder<T>(payload);
+
+    }
+
+    private static Metadata buildMetaData(final Object eventObject, final Metadata metadata) {
         if (eventObject == null) {
             throw new IllegalArgumentException("Event object should not be null");
         }
@@ -85,7 +96,7 @@ public class DefaultEnveloper implements Enveloper {
         return buildMetaData(metadata, eventMap.get(eventObject.getClass()));
     }
 
-    private Metadata buildMetaData(final Metadata metadata, final String name) {
+    private static Metadata buildMetaData(final Metadata metadata, final String name) {
 
         JsonObjectBuilder metadataBuilder = JsonObjects.createObjectBuilderWithFilter(metadata.asJsonObject(),
                 x -> !Arrays.asList(ID, NAME, CAUSATION, STREAM).contains(x));
@@ -100,7 +111,7 @@ public class DefaultEnveloper implements Enveloper {
         return metadataFrom(jsonObject).build();
     }
 
-    private JsonArray createCausation(final Metadata metadata) {
+    private static JsonArray createCausation(final Metadata metadata) {
         JsonArrayBuilder causation = Json.createArrayBuilder();
         if (metadata.asJsonObject().containsKey(CAUSATION)) {
             metadata.asJsonObject().getJsonArray(CAUSATION).forEach(causation::add);
@@ -109,4 +120,31 @@ public class DefaultEnveloper implements Enveloper {
 
         return causation.build();
     }
+
+    private static class DefaultEnveloperBuilder<T> implements EnveloperBuilder {
+
+        private String name;
+        private T payload;
+
+        private DefaultEnveloperBuilder(final T payload) {
+            this.payload = payload;
+        }
+
+        private void setName(final String name) {
+            this.name = name;
+        }
+
+        @Override
+        public EnveloperBuilder withName(final String name) {
+            this.setName(name);
+            return this;
+        }
+
+        @Override
+        public Envelope withMetadataFrom(final Envelope envelope) {
+            return new DefaultEnvelope(buildMetaData(envelope.metadata(), this.name), this.payload);
+        }
+
+    }
+
 }

@@ -20,6 +20,7 @@ import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderF
 
 import uk.gov.justice.services.core.aggregate.AggregateService;
 import uk.gov.justice.services.core.enveloper.Enveloper;
+import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.eventsourcing.source.core.EventSource;
 import uk.gov.justice.services.eventsourcing.source.core.EventStream;
 import uk.gov.justice.services.example.cakeshop.domain.event.CakeOrdered;

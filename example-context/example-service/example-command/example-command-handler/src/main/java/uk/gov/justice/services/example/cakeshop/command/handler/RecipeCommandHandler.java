@@ -2,6 +2,7 @@ package uk.gov.justice.services.example.cakeshop.command.handler;
 
 import static org.slf4j.LoggerFactory.getLogger;
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_HANDLER;
+import static uk.gov.justice.services.core.enveloper.Enveloper.toEnvelopeWithMetadataFrom;
 import static uk.gov.justice.services.messaging.JsonObjects.getBoolean;
 import static uk.gov.justice.services.messaging.JsonObjects.getString;
 import static uk.gov.justice.services.messaging.JsonObjects.getUUID;
@@ -16,6 +17,7 @@ import uk.gov.justice.services.eventsourcing.source.core.Tolerance;
 import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamException;
 import uk.gov.justice.services.example.cakeshop.domain.Ingredient;
 import uk.gov.justice.services.example.cakeshop.domain.aggregate.Recipe;
+import uk.gov.justice.services.messaging.Envelope;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
 import java.util.List;
@@ -59,22 +61,23 @@ public class RecipeCommandHandler {
 
         eventStream.append(
                 recipe.addRecipe(recipeId, name, glutenFree, ingredients)
-                        .map(enveloper.withMetadataFrom(command)));
+                        .map(toEnvelopeWithMetadataFrom(command)));
     }
 
     @Handles("example.command.rename-recipe")
-    public void renameRecipe(final JsonEnvelope command) throws EventStreamException {
+    public void renameRecipe(final Envelope<RenameRecipe> command) throws EventStreamException {
         LOGGER.trace("=============> Inside rename-recipe Command Handler");
 
-        final UUID recipeId = getUUID(command.payloadAsJsonObject(), FIELD_RECIPE_ID).get();
-        final String name = getString(command.payloadAsJsonObject(), FIELD_NAME).get();
+        final UUID recipeId = UUID.fromString(command.payload().getRecipeId());
+        final String name = command.payload().getName();
+
 
         final EventStream eventStream = eventSource.getStreamById(recipeId);
         final Recipe recipe = aggregateService.get(eventStream, Recipe.class);
 
         eventStream.append(
                 recipe.renameRecipe(name)
-                        .map(enveloper.withMetadataFrom(command)),
+                        .map(toEnvelopeWithMetadataFrom(command)),
                 Tolerance.NON_CONSECUTIVE);
 
     }
@@ -90,7 +93,7 @@ public class RecipeCommandHandler {
 
         eventStream.append(
                 recipe.removeRecipe()
-                        .map(enveloper.withMetadataFrom(command)));
+                        .map(toEnvelopeWithMetadataFrom(command)));
     }
 
     @Handles("example.command.upload-photograph")
@@ -105,7 +108,7 @@ public class RecipeCommandHandler {
 
         eventStream.append(
                 recipe.addPhotograph(photoId)
-                        .map(enveloper.withMetadataFrom(command)),
+                        .map(toEnvelopeWithMetadataFrom(command)),
                 Tolerance.NON_CONSECUTIVE);
     }
 
