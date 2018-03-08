@@ -143,5 +143,9 @@
             <artifactId>java-8-matchers</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>uk.gov.justice.framework-api</groupId>
+            <artifactId>framework-api-event-source</artifactId>
+        </dependency>
     </dependencies>
 </project>
