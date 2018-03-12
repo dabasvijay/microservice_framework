@@ -5,14 +5,11 @@ import uk.gov.justice.services.core.interceptor.spi.InterceptorContextProvider;
 import uk.gov.justice.services.eventsourcing.source.core.EventSource;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
-import java.util.stream.Stream;
+import java.util.UUID;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
-/**
- * Created by matt on 08/03/2018.
- */
 public class SubscriptionManager {
 
     @Inject
@@ -35,13 +32,19 @@ public class SubscriptionManager {
      */
     public void processEvent(final JsonEnvelope jsonEnvelope) {
 
-        // Would this need to return whether or not we continue processing?
-        // If it is stored in buffer (out of sequence) then we don't do any more.
-        // If it is the missing even in a buffer would it need to return all the events that are to be processed?
-        // Maybe it returns stream<JsonEnvelope> ?
-        Stream<JsonEnvelope> events = subscriptionsService.updateSubscriptionFor(jsonEnvelope);
+        final Subscription subscription = subscriptionsService.getSubscriptionFor(sourceFrom(jsonEnvelope), streamIdFrom(jsonEnvelope));
 
-        events.forEach(e->interceptorChain.processNext(InterceptorContextProvider.provider().interceptorContextWithInput(e)));
+        subscription.append(jsonEnvelope);
+        subscription.read()
+                .forEach(e -> interceptorChain.processNext(InterceptorContextProvider.provider().interceptorContextWithInput(e)));
+    }
+
+    private UUID streamIdFrom(final JsonEnvelope jsonEnvelope) {
+        return jsonEnvelope.metadata().streamId().get();
+    }
+
+    private String sourceFrom(final JsonEnvelope jsonEnvelope) {
+        return jsonEnvelope.metadata().name(); //should be something like jsonEnvelope.metadata().source
     }
 
     @PostConstruct
