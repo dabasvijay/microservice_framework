@@ -27,7 +27,6 @@ import static org.raml.model.ActionType.OPTIONS;
 import static org.raml.model.ActionType.PATCH;
 import static org.raml.model.ActionType.POST;
 import static org.raml.model.ActionType.TRACE;
-import static uk.gov.justice.raml.jms.config.GeneratorPropertiesFactory.generatorProperties;
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_CONTROLLER;
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_HANDLER;
 import static uk.gov.justice.services.core.annotation.Component.EVENT_LISTENER;
@@ -41,6 +40,8 @@ import static uk.gov.justice.services.generators.test.utils.config.GeneratorConf
 import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.methodsOf;
 import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
 
+import uk.gov.justice.maven.generator.io.files.parser.core.GeneratorProperties;
+import uk.gov.justice.raml.jms.config.GeneratorPropertiesFactory;
 import uk.gov.justice.services.adapter.messaging.JmsLoggerMetadataInterceptor;
 import uk.gov.justice.services.adapter.messaging.JmsProcessor;
 import uk.gov.justice.services.adapter.messaging.JsonSchemaValidationInterceptor;
@@ -48,7 +49,6 @@ import uk.gov.justice.services.core.annotation.Adapter;
 import uk.gov.justice.services.core.annotation.Component;
 import uk.gov.justice.services.core.interceptor.InterceptorChainProcessor;
 import uk.gov.justice.services.core.interceptor.InterceptorContext;
-import uk.gov.justice.services.generators.commons.config.CommonGeneratorProperties;
 import uk.gov.justice.services.generators.test.utils.BaseGeneratorTest;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
@@ -60,7 +60,6 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.function.Consumer;
 
 import javax.ejb.ActivationConfigProperty;
@@ -95,13 +94,13 @@ public class JmsEndpointGeneratorTest extends BaseGeneratorTest {
     @Mock
     InterceptorChainProcessor interceptorChainProcessor;
 
-    private Map<String, String> generatorProperties;
+    private GeneratorProperties generatorProperties;
 
     @Before
     public void setup() throws Exception {
         super.before();
         generator = new JmsEndpointGenerator();
-        generatorProperties = generatorProperties().withDefaultServiceComponent().build();
+        generatorProperties = new GeneratorPropertiesFactory().withDefaultServiceComponent();
 
     }
 
@@ -287,7 +286,7 @@ public class JmsEndpointGeneratorTest extends BaseGeneratorTest {
                                 .withRelativeUri("/people.some.queue")
                                 .with(httpAction(POST, "application/vnd.people.abc+json")))
                         .build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withServiceComponentOf(COMMAND_HANDLER).build()));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, new GeneratorPropertiesFactory().withServiceComponentOf(COMMAND_HANDLER)));
         Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "AbcCommandHandlerPeopleSomeQueueJmsListener");
         Adapter adapterAnnotation = clazz.getAnnotation(Adapter.class);
         assertThat(adapterAnnotation, not(nullValue()));
@@ -303,7 +302,7 @@ public class JmsEndpointGeneratorTest extends BaseGeneratorTest {
                                 .withRelativeUri("/people.some.query")
                                 .with(httpAction(POST, "application/vnd.people.abc+json")))
                         .build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withServiceComponentOf(COMMAND_CONTROLLER).build()));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, new GeneratorPropertiesFactory().withServiceComponentOf(COMMAND_CONTROLLER)));
 
         Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "AbcCommandControllerPeopleSomeQueryJmsListener");
         Adapter adapterAnnotation = clazz.getAnnotation(Adapter.class);
@@ -321,7 +320,7 @@ public class JmsEndpointGeneratorTest extends BaseGeneratorTest {
                                 .withRelativeUri("/people.event")
                                 .with(httpAction(POST, "application/vnd.people.abc+json")))
                         .build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withServiceComponentOf(EVENT_LISTENER).build()));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, new GeneratorPropertiesFactory().withServiceComponentOf(EVENT_LISTENER)));
 
         Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "PeopleEventListenerPeopleEventJmsListener");
         Adapter adapterAnnotation = clazz.getAnnotation(Adapter.class);
@@ -339,7 +338,7 @@ public class JmsEndpointGeneratorTest extends BaseGeneratorTest {
                                 .withRelativeUri("/people.event")
                                 .with(httpAction(POST, "application/vnd.people.abc+json")))
                         .build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withServiceComponentOf("CUSTOM_EVENT_LISTENER").build()));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, new GeneratorPropertiesFactory().withServiceComponentOf("CUSTOM_EVENT_LISTENER")));
 
         Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "CustomEventListenerPeopleEventJmsListener");
         Adapter adapterAnnotation = clazz.getAnnotation(Adapter.class);
@@ -362,7 +361,7 @@ public class JmsEndpointGeneratorTest extends BaseGeneratorTest {
                                 .withRelativeUri("/people.event")
                                 .with(httpAction(POST, "application/vnd.people.abc+json")))
                         .build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withServiceComponentOf(EVENT_PROCESSOR).build()));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, new GeneratorPropertiesFactory().withServiceComponentOf(EVENT_PROCESSOR)));
 
         Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "PeopleEventProcessorPeopleEventJmsListener");
         Adapter adapterAnnotation = clazz.getAnnotation(Adapter.class);
@@ -546,7 +545,7 @@ public class JmsEndpointGeneratorTest extends BaseGeneratorTest {
                                 .withRelativeUri("/people.event")
                                 .with(httpAction(POST, "application/vnd.people.abc+json")))
                         .build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withServiceComponentOf(EVENT_LISTENER).build()));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, new GeneratorPropertiesFactory().withServiceComponentOf(EVENT_LISTENER)));
 
         Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "ContextEventProcessorPeopleEventJmsListener");
         assertThat(clazz.getAnnotation(MessageDriven.class), is(notNullValue()));
@@ -740,7 +739,7 @@ public class JmsEndpointGeneratorTest extends BaseGeneratorTest {
                                 .withRelativeUri("/people.event")
                                 .with(httpAction(POST, "application/vnd.context1.event.abc+json")))
                         .build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withServiceComponentOf(EVENT_LISTENER).build()));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, new GeneratorPropertiesFactory().withServiceComponentOf(EVENT_LISTENER)));
 
         Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "PeopleEventListenerPeopleEventJmsListener");
         ActivationConfigProperty[] activationConfig = clazz.getAnnotation(MessageDriven.class).activationConfig();
@@ -803,7 +802,7 @@ public class JmsEndpointGeneratorTest extends BaseGeneratorTest {
                                 .withRelativeUri("/people.person-added")
                                 .with(httpAction(POST, "application/vnd.people.abc+json")))
                         .build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withServiceComponentOf(EVENT_LISTENER).withCustomMDBPool()));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, new GeneratorPropertiesFactory().withCustomMDBPool()));
         Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "PeopleEventListenerPeoplePersonAddedJmsListener");
         Pool poolAnnotation = clazz.getAnnotation(Pool.class);
         assertThat(poolAnnotation, not(nullValue()));

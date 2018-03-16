@@ -168,9 +168,6 @@
                     <outputDirectory>${project.build.directory}/generated-test-sources
                     </outputDirectory>
                     <basePackageName>uk.gov.justice.api</basePackageName>
-                    <generatorProperties
-                            implementation="uk.gov.justice.services.generators.commons.config.CommonGeneratorProperties">
-                    </generatorProperties>
                 </configuration>
                 <executions>
                     <execution>
@@ -183,7 +180,7 @@
                             <includes>
                                 <include>**/all-events-processor.raml</include>
                             </includes>
-                            <generatorProperties>
+                            <generatorProperties implementation="uk.gov.justice.services.generators.commons.config.CommonGeneratorProperties">
                                 <serviceComponent>EVENT_PROCESSOR</serviceComponent>
                             </generatorProperties>
                         </configuration>
@@ -198,7 +195,7 @@
                             <includes>
                                 <include>**/command-controller.raml</include>
                             </includes>
-                            <generatorProperties>
+                            <generatorProperties implementation="uk.gov.justice.services.generators.commons.config.CommonGeneratorProperties">
                                 <serviceComponent>COMMAND_CONTROLLER</serviceComponent>
                             </generatorProperties>
                         </configuration>
@@ -213,7 +210,7 @@
                             <includes>
                                 <include>**/command-handler.raml</include>
                             </includes>
-                            <generatorProperties>
+                            <generatorProperties implementation="uk.gov.justice.services.generators.commons.config.CommonGeneratorProperties">
                                 <serviceComponent>COMMAND_HANDLER</serviceComponent>
                             </generatorProperties>
                         </configuration>
@@ -228,7 +225,7 @@
                             <includes>
                                 <include>**/event-listener.raml</include>
                             </includes>
-                            <generatorProperties>
+                            <generatorProperties implementation="uk.gov.justice.services.generators.commons.config.CommonGeneratorProperties">
                                 <serviceComponent>EVENT_LISTENER</serviceComponent>
                             </generatorProperties>
                         </configuration>
@@ -243,7 +240,7 @@
                             <includes>
                                 <include>**/custom-event-listener.raml</include>
                             </includes>
-                            <generatorProperties>
+                            <generatorProperties implementation="uk.gov.justice.services.generators.commons.config.CommonGeneratorProperties">
                                 <serviceComponent>CUSTOM_EVENT_LISTENER</serviceComponent>
                             </generatorProperties>
                         </configuration>
@@ -258,7 +255,7 @@
                             <includes>
                                 <include>**/event-processor.raml</include>
                             </includes>
-                            <generatorProperties>
+                            <generatorProperties implementation="uk.gov.justice.services.generators.commons.config.CommonGeneratorProperties">
                                 <serviceComponent>EVENT_PROCESSOR</serviceComponent>
                             </generatorProperties>
                         </configuration>
@@ -286,10 +283,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-failsafe-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
                     <systemPropertyVariables>
                         <random.jms.port>${random-jms-port}</random.jms.port>

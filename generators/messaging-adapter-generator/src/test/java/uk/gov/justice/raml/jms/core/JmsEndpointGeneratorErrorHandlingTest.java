@@ -1,16 +1,14 @@
 package uk.gov.justice.raml.jms.core;
 
 import static org.raml.model.ActionType.POST;
-import static uk.gov.justice.services.core.annotation.Component.EVENT_LISTENER;
 import static uk.gov.justice.services.core.annotation.Component.QUERY_API;
 import static uk.gov.justice.services.generators.test.utils.builder.HttpActionBuilder.httpAction;
 import static uk.gov.justice.services.generators.test.utils.builder.RamlBuilder.raml;
 import static uk.gov.justice.services.generators.test.utils.builder.ResourceBuilder.resource;
 import static uk.gov.justice.services.generators.test.utils.config.GeneratorConfigUtil.configurationWithBasePackage;
-import static uk.gov.justice.services.generators.test.utils.config.GeneratorPropertiesBuilder.generatorProperties;
 
+import uk.gov.justice.raml.jms.config.GeneratorPropertiesFactory;
 import uk.gov.justice.services.generators.commons.config.CommonGeneratorProperties;
-import uk.gov.justice.services.generators.commons.config.GeneratorProperties;
 import uk.gov.justice.services.generators.commons.validator.RamlValidationException;
 import uk.gov.justice.services.generators.test.utils.BaseGeneratorTest;
 
@@ -112,6 +110,6 @@ public class JmsEndpointGeneratorErrorHandlingTest extends BaseGeneratorTest {
                                 .withRelativeUri("/structure.event")
                                 .withDefaultPostAction())
                         .build(),
-                configurationWithBasePackage("uk.somepackage", outputFolder, generatorProperties().withServiceComponentOf(QUERY_API).build()));
+                configurationWithBasePackage("uk.somepackage", outputFolder, new GeneratorPropertiesFactory().withServiceComponentOf(QUERY_API)));
     }
 }
