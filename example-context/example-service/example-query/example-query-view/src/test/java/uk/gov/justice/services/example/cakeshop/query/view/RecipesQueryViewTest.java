@@ -13,9 +13,6 @@ import static uk.gov.justice.services.core.annotation.Component.QUERY_VIEW;
 import static uk.gov.justice.services.test.utils.core.matchers.HandlerMatcher.isHandler;
 import static uk.gov.justice.services.test.utils.core.matchers.HandlerMethodMatcher.method;
 
-import uk.gov.justice.services.common.converter.ObjectToJsonValueConverter;
-import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
-import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.example.cakeshop.query.view.request.SearchRecipes;
 import uk.gov.justice.services.example.cakeshop.query.view.response.PhotoView;
 import uk.gov.justice.services.example.cakeshop.query.view.response.RecipeView;
@@ -24,40 +21,26 @@ import uk.gov.justice.services.example.cakeshop.query.view.service.RecipeService
 import uk.gov.justice.services.messaging.Envelope;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.Metadata;
-import uk.gov.justice.services.test.utils.core.enveloper.EnveloperFactory;
 
 import java.util.Optional;
 import java.util.UUID;
 
 import javax.json.JsonObject;
 
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public class RecipesQueryViewTest {
-
-    @Spy
-    private Enveloper enveloper = new EnveloperFactory().create();
-
-    @Mock
-    ObjectToJsonValueConverter objectToJsonValueConverter = new ObjectToJsonValueConverter(new ObjectMapperProducer().objectMapper());
 
     @Mock
     private RecipeService service;
 
     @InjectMocks
     private RecipesQueryView queryView;
-
-    @Before
-    public void setUp() throws Exception {
-        queryView = new RecipesQueryView(service, enveloper);
-    }
 
     @Test
     public void shouldHaveCorrectHandlerMethod() throws Exception {
@@ -75,31 +58,31 @@ public class RecipesQueryViewTest {
         final String recipeName = "some recipe name";
         when(service.findRecipe(recipeId.toString())).thenReturn(new RecipeView(recipeId, recipeName, false));
 
-        JsonObject jsonObject = createObjectBuilder().add("recipeId", recipeId.toString()).build();
+        final JsonObject jsonObject = createObjectBuilder().add("recipeId", recipeId.toString()).build();
 
-        Envelope<JsonObject> envelope = new LocalDefaultNewEnvelope<>(createMetadata(), jsonObject);
+        final Envelope<JsonObject> envelope = new LocalDefaultNewEnvelope<>(createMetadata(), jsonObject);
         final Envelope<RecipeView> response = queryView.findRecipe(envelope);
-        RecipeView payload = response.payload();
+        final RecipeView payload = response.payload();
         assertThat(payload.getId(), is(recipeId));
         assertThat(payload.getName(), is(recipeName));
 
     }
 
-  @Test
+    @Test
     public void shouldReturnResponseWithMetadataWhenQueryingForRecipe() {
 
-      final UUID recipeId = UUID.randomUUID();
-      final String recipeName = "some recipe name";
-      when(service.findRecipe(recipeId.toString())).thenReturn(new RecipeView(recipeId, recipeName, false));
+        final UUID recipeId = UUID.randomUUID();
+        final String recipeName = "some recipe name";
+        when(service.findRecipe(recipeId.toString())).thenReturn(new RecipeView(recipeId, recipeName, false));
 
-      JsonObject jsonObject = createObjectBuilder().add("recipeId", recipeId.toString()).build();
-      Envelope<JsonObject> envelope = new LocalDefaultNewEnvelope<>(createMetadata(), jsonObject);
+        final JsonObject jsonObject = createObjectBuilder().add("recipeId", recipeId.toString()).build();
+        final Envelope<JsonObject> envelope = new LocalDefaultNewEnvelope<>(createMetadata(), jsonObject);
 
-      final Envelope<RecipeView> response = queryView.findRecipe(envelope);
-      RecipeView payload = response.payload();
+        final Envelope<RecipeView> response = queryView.findRecipe(envelope);
+        final RecipeView payload = response.payload();
 
-      assertThat(payload.getName(), is(response.payload().getName()));
-      assertThat(payload.getId(), is(response.payload().getId()));
+        assertThat(payload.getName(), is(response.payload().getName()));
+        assertThat(payload.getId(), is(response.payload().getId()));
     }
 
     @Test
@@ -114,9 +97,9 @@ public class RecipesQueryViewTest {
         when(service.getRecipes(pagesize, Optional.empty(), Optional.empty()))
                 .thenReturn(new RecipesView(asList(new RecipeView(recipeId, recipeName, false), new RecipeView(recipeId2, recipeName2, false))));
 
-        JsonObject jsonObject = createObjectBuilder().add("pagesize", pagesize).build();
+        final JsonObject jsonObject = createObjectBuilder().add("pagesize", pagesize).build();
 
-        Envelope<JsonObject> envelope = new LocalDefaultNewEnvelope<>(createMetadata(), jsonObject);
+        final Envelope<JsonObject> envelope = new LocalDefaultNewEnvelope<>(createMetadata(), jsonObject);
         final Envelope<RecipesView> response = queryView.listRecipes(envelope);
 
         assertThat(response.payload().getRecipes().size(), is(2));
@@ -139,12 +122,12 @@ public class RecipesQueryViewTest {
         when(service.getRecipes(pagesize, Optional.of(nameUsedInQuery), Optional.empty()))
                 .thenReturn(new RecipesView(singletonList(new RecipeView(recipeId, recipeName, false))));
 
-        JsonObject jsonObject = createObjectBuilder()
+        final JsonObject jsonObject = createObjectBuilder()
                 .add("pagesize", pagesize)
                 .add("name", nameUsedInQuery)
                 .build();
 
-        Envelope<JsonObject> envelope = new LocalDefaultNewEnvelope<>(createMetadata(), jsonObject);
+        final Envelope<JsonObject> envelope = new LocalDefaultNewEnvelope<>(createMetadata(), jsonObject);
         final Envelope<RecipesView> response = queryView.listRecipes(envelope);
 
         assertThat(response.payload().getRecipes().get(0).getId(), is(recipeId));
@@ -165,12 +148,12 @@ public class RecipesQueryViewTest {
                 new RecipesView(singletonList(new RecipeView(recipeId, recipeName, glutenFree))));
 
 
-        JsonObject jsonObject = createObjectBuilder()
+        final JsonObject jsonObject = createObjectBuilder()
                 .add("pagesize", pagesize)
                 .add("glutenFree", glutenFree)
                 .build();
 
-        Envelope<JsonObject> envelope = new LocalDefaultNewEnvelope<>(createMetadata(), jsonObject);
+        final Envelope<JsonObject> envelope = new LocalDefaultNewEnvelope<>(createMetadata(), jsonObject);
         final Envelope<RecipesView> response = queryView.listRecipes(envelope);
 
         assertThat(response.payload().getRecipes().get(0).getId(), is(recipeId));
@@ -182,8 +165,8 @@ public class RecipesQueryViewTest {
     @Test
     public void shouldReturnResponseWithMetadataWhenQueryingForRecipes() {
 
-        JsonObject jsonObject = createObjectBuilder().add("pagesize", 1).build();
-        Envelope<JsonObject> envelope = new LocalDefaultNewEnvelope<>(createMetadata(), jsonObject);
+        final JsonObject jsonObject = createObjectBuilder().add("pagesize", 1).build();
+        final Envelope<JsonObject> envelope = new LocalDefaultNewEnvelope<>(createMetadata(), jsonObject);
         final Envelope<RecipesView> response = queryView.listRecipes(envelope);
 
         assertThat(response.metadata().name(), is("example.search-recipes"));
@@ -202,14 +185,14 @@ public class RecipesQueryViewTest {
         when(service.getRecipes(pagesize, Optional.of(recipeName), Optional.of(false)))
                 .thenReturn(new RecipesView(asList(new RecipeView(recipeId, recipeName, false), new RecipeView(recipeId2, recipeName2, false))));
 
-        SearchRecipes searchRecipes = new SearchRecipes(pagesize);
+        final SearchRecipes searchRecipes = new SearchRecipes(pagesize);
         searchRecipes.setName(recipeName);
         searchRecipes.setGlutenFree(false);
 
-        Envelope<SearchRecipes> envelope = new LocalDefaultNewEnvelope<>(createMetadata(), searchRecipes);
+        final Envelope<SearchRecipes> envelope = new LocalDefaultNewEnvelope<>(createMetadata(), searchRecipes);
 
         final Envelope<RecipesView> response = queryView.queryRecipes(envelope);
-        RecipesView payload = response.payload();
+        final RecipesView payload = response.payload();
         assertThat(payload.getRecipes().get(0).getName(), is(searchRecipes.getName()));
 
     }
@@ -222,9 +205,9 @@ public class RecipesQueryViewTest {
 
         when(service.findRecipePhoto(recipeId.toString())).thenReturn(new PhotoView(fileId));
 
-        JsonObject jsonObject = createObjectBuilder().add("recipeId", recipeId.toString()).build();
+        final JsonObject jsonObject = createObjectBuilder().add("recipeId", recipeId.toString()).build();
 
-        Envelope<JsonObject> envelope = new LocalDefaultNewEnvelope<>(createMetadata(), jsonObject);
+        final Envelope<JsonObject> envelope = new LocalDefaultNewEnvelope<>(createMetadata(), jsonObject);
 
         final Envelope<PhotoView> response = queryView.findRecipePhoto(envelope);
 
@@ -240,9 +223,9 @@ public class RecipesQueryViewTest {
 
         when(service.findRecipePhoto(recipeId.toString())).thenReturn(null);
 
-        JsonObject jsonObject = createObjectBuilder().add("recipeId", recipeId.toString()).build();
+        final JsonObject jsonObject = createObjectBuilder().add("recipeId", recipeId.toString()).build();
 
-        Envelope<JsonObject> envelope = new LocalDefaultNewEnvelope<>(createMetadata(), jsonObject);
+        final Envelope<JsonObject> envelope = new LocalDefaultNewEnvelope<>(createMetadata(), jsonObject);
 
         final Envelope<PhotoView> response = queryView.findRecipePhoto(envelope);
         assertThat(response.metadata().name(), is("example.get-recipe-photograph"));

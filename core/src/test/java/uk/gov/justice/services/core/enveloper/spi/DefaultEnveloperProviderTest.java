@@ -21,6 +21,7 @@ import java.util.UUID;
 import java.util.function.Function;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import org.apache.openejb.OpenEjbContainer;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -32,9 +33,11 @@ public class DefaultEnveloperProviderTest {
 
     @Before
     public void setup() throws JsonProcessingException {
+        OpenEjbContainer.createEJBContainer();
         enveloper = new DefaultEnveloper(
                 new UtcClock(),
                 new ObjectToJsonValueConverter(new ObjectMapperProducer().objectMapper()));
+
     }
 
     @Test

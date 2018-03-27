@@ -25,10 +25,7 @@ import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopePaylo
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeStreamMatcher.streamContaining;
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataOf;
 
-import uk.gov.justice.services.common.converter.ObjectToJsonValueConverter;
-import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.core.aggregate.AggregateService;
-import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.eventsourcing.source.core.EventSource;
 import uk.gov.justice.services.eventsourcing.source.core.EventStream;
 import uk.gov.justice.services.eventsourcing.source.core.Tolerance;
@@ -43,11 +40,11 @@ import uk.gov.justice.services.messaging.Metadata;
 
 import java.util.UUID;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -75,14 +72,13 @@ public class RecipeCommandHandlerTest {
     @Mock
     private AggregateService aggregateService;
 
-    @Mock
-    ObjectToJsonValueConverter objectToJsonValueConverter = new ObjectToJsonValueConverter(new ObjectMapperProducer().objectMapper());
-
-    @Spy
-    private Enveloper enveloper = createEnveloperWithEvents(RecipeAdded.class, RecipeRenamed.class, RecipeRemoved.class, RecipePhotographAdded.class);
-
     @InjectMocks
     private RecipeCommandHandler recipeCommandHandler;
+
+    @Before
+    public void setup() throws Exception {
+        createEnveloperWithEvents(RecipeAdded.class, RecipeRenamed.class, RecipeRemoved.class, RecipePhotographAdded.class);
+    }
 
     @Test
     public void shouldHaveCorrectHandlesAnnotation() throws Exception {
@@ -144,10 +140,10 @@ public class RecipeCommandHandlerTest {
 
         when(eventSource.getStreamById(RECIPE_ID)).thenReturn(eventStream);
         when(aggregateService.get(eventStream, Recipe.class)).thenReturn(existingRecipe());
-        System.out.println("Before Command: "+ command.payload().getName());
+        System.out.println("Before Command: " + command.payload().getName());
         recipeCommandHandler.renameRecipe(command);
 
-        System.out.println("After  Command: "+ command.payload().getName());
+        System.out.println("After  Command: " + command.payload().getName());
 
         assertThat(command.payload().getName(), is(RECIPE_NAME));
 

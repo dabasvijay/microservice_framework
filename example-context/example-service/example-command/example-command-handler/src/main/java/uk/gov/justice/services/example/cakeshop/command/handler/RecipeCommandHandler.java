@@ -10,7 +10,6 @@ import static uk.gov.justice.services.messaging.JsonObjects.getUUID;
 import uk.gov.justice.services.core.aggregate.AggregateService;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
-import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.eventsourcing.source.core.EventSource;
 import uk.gov.justice.services.eventsourcing.source.core.EventStream;
 import uk.gov.justice.services.eventsourcing.source.core.Tolerance;
@@ -43,9 +42,6 @@ public class RecipeCommandHandler {
 
     @Inject
     AggregateService aggregateService;
-
-    @Inject
-    Enveloper enveloper;
 
     @Handles("example.command.add-recipe")
     public void addRecipe(final JsonEnvelope command) throws EventStreamException {

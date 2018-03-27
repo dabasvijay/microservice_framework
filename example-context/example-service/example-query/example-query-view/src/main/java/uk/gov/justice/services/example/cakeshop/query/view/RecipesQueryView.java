@@ -1,5 +1,6 @@
 package uk.gov.justice.services.example.cakeshop.query.view;
 
+import static java.lang.String.format;
 import static org.slf4j.LoggerFactory.getLogger;
 import static uk.gov.justice.services.core.enveloper.Enveloper.envelop;
 import static uk.gov.justice.services.messaging.JsonObjects.getBoolean;
@@ -8,7 +9,6 @@ import static uk.gov.justice.services.messaging.JsonObjects.getString;
 import uk.gov.justice.services.core.annotation.Component;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
-import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.example.cakeshop.query.view.request.SearchRecipes;
 import uk.gov.justice.services.example.cakeshop.query.view.response.PhotoView;
 import uk.gov.justice.services.example.cakeshop.query.view.response.RecipeView;
@@ -36,18 +36,12 @@ public class RecipesQueryView {
     private static final String PAGESIZE = "pagesize";
     private static final String FIELD_GLUTEN_FREE = "glutenFree";
 
-    private final RecipeService recipeService;
-    private final Enveloper enveloper;
-
     @Inject
-    public RecipesQueryView(RecipeService recipeService, Enveloper enveloper) {
-        this.recipeService = recipeService;
-        this.enveloper = enveloper;
-    }
+    RecipeService recipeService;
 
     @Handles("example.get-recipe")
     public Envelope<RecipeView> findRecipe(final Envelope<JsonObject> query) {
-        LOGGER.info("=============> Inside findRecipe Query View. RecipeId: " + query.payload().getString(FIELD_RECIPE_ID));
+        LOGGER.info(format("=============> Inside findRecipe Query View. RecipeId: %s", query.payload().getString(FIELD_RECIPE_ID)));
 
         final RecipeView recipe = recipeService.findRecipe(query.payload().getString(FIELD_RECIPE_ID));
 
@@ -82,7 +76,7 @@ public class RecipesQueryView {
                 .withMetadataFrom(query);
     }
 
-    private RecipesView fetchRecipes(final Envelope<JsonObject>  query) {
+    private RecipesView fetchRecipes(final Envelope<JsonObject> query) {
         final JsonObject queryObject = query.payload();
         return recipeService.getRecipes(
                 queryObject.getInt(PAGESIZE),
@@ -105,5 +99,4 @@ public class RecipesQueryView {
                 getString(queryObject, FIELD_NAME),
                 getBoolean(queryObject, FIELD_GLUTEN_FREE));
     }
-
 }
