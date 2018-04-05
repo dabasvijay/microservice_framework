@@ -92,7 +92,8 @@ public class MessageListenerCodeGeneratorTest  {
                 "  private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(uk.gov.moj.base.package.name.MyContextEventListenerMyContextHandlerCommandJmsListener.class);\n" +
                 "\n" +
                 "  @javax.inject.Inject\n" +
-                "  uk.gov.justice.services.core.interceptor.InterceptorChainProcessor interceptorChainProcessor;\n" +
+                "  @uk.gov.justice.services.core.cdi.SubscriptionName(\"subscription\")\n" +
+                "  uk.gov.justice.services.event.sourcing.subscription.SubscriptionManager subscriptionManager;\n" +
                 "\n" +
                 "  @javax.inject.Inject\n" +
                 "  uk.gov.justice.services.adapter.messaging.JmsProcessor jmsProcessor;\n" +
@@ -100,7 +101,7 @@ public class MessageListenerCodeGeneratorTest  {
                 "  @java.lang.Override\n" +
                 "  public void onMessage(javax.jms.Message message) {\n" +
                 "    uk.gov.justice.services.messaging.logging.LoggerUtils.trace(LOGGER, () -> \"Received JMS message\");\n" +
-                "    jmsProcessor.process(interceptorChainProcessor::process, message);\n" +
+                "    jmsProcessor.process(subscriptionManager, message);\n" +
                 "  }\n" +
                 "}\n"));
     }
@@ -166,7 +167,8 @@ public class MessageListenerCodeGeneratorTest  {
                 "  private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(uk.gov.moj.base.package.name.MyContextCommandHandlerMyContextHandlerCommandJmsListener.class);\n" +
                 "\n" +
                 "  @javax.inject.Inject\n" +
-                "  uk.gov.justice.services.core.interceptor.InterceptorChainProcessor interceptorChainProcessor;\n" +
+                "  @uk.gov.justice.services.core.cdi.SubscriptionName(\"subscription\")\n" +
+                "  uk.gov.justice.services.event.sourcing.subscription.SubscriptionManager subscriptionManager;\n" +
                 "\n" +
                 "  @javax.inject.Inject\n" +
                 "  uk.gov.justice.services.adapter.messaging.JmsProcessor jmsProcessor;\n" +
@@ -174,7 +176,7 @@ public class MessageListenerCodeGeneratorTest  {
                 "  @java.lang.Override\n" +
                 "  public void onMessage(javax.jms.Message message) {\n" +
                 "    uk.gov.justice.services.messaging.logging.LoggerUtils.trace(LOGGER, () -> \"Received JMS message\");\n" +
-                "    jmsProcessor.process(interceptorChainProcessor::process, message);\n" +
+                "    jmsProcessor.process(subscriptionManager, message);\n" +
                 "  }\n" +
                 "}\n"));
     }
@@ -223,6 +225,7 @@ public class MessageListenerCodeGeneratorTest  {
 
         final TypeSpec typeSpec = messageListenerCodeGenerator.generate(subscriptionDescriptor, subscription, (CommonGeneratorProperties) generatorProperties, classNameFactory);
 
+        System.out.println(typeSpec.toString());
         assertThat(typeSpec.toString(), is("@uk.gov.justice.services.core.annotation.Adapter(\"COMMAND_API\")\n" +
                 "@javax.ejb.MessageDriven(\n" +
                 "    activationConfig = {\n" +
@@ -240,7 +243,8 @@ public class MessageListenerCodeGeneratorTest  {
                 "  private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(uk.gov.moj.base.package.name.MyContextCommandApiMyContextHandlerCommandJmsListener.class);\n" +
                 "\n" +
                 "  @javax.inject.Inject\n" +
-                "  uk.gov.justice.services.core.interceptor.InterceptorChainProcessor interceptorChainProcessor;\n" +
+                "  @uk.gov.justice.services.core.cdi.SubscriptionName(\"subscription\")\n" +
+                "  uk.gov.justice.services.event.sourcing.subscription.SubscriptionManager subscriptionManager;\n" +
                 "\n" +
                 "  @javax.inject.Inject\n" +
                 "  uk.gov.justice.services.adapter.messaging.JmsProcessor jmsProcessor;\n" +
@@ -248,7 +252,7 @@ public class MessageListenerCodeGeneratorTest  {
                 "  @java.lang.Override\n" +
                 "  public void onMessage(javax.jms.Message message) {\n" +
                 "    uk.gov.justice.services.messaging.logging.LoggerUtils.trace(LOGGER, () -> \"Received JMS message\");\n" +
-                "    jmsProcessor.process(interceptorChainProcessor::process, message);\n" +
+                "    jmsProcessor.process(subscriptionManager, message);\n" +
                 "  }\n" +
                 "}\n"));
     }

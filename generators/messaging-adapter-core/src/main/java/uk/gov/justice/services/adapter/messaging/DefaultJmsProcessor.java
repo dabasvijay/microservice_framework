@@ -22,7 +22,7 @@ import org.slf4j.LoggerFactory;
 /**
  * In order to minimise the amount of generated code in the JMS Listener implementation classes,
  * this service encapsulates all the logic for validating a message and converting it to an
- * envelope, passing it to a consumer.  This allows testing of this logic independently from the
+ * envelope, passing it to a subscription manager to manage the message.  This allows testing of this logic independently from the
  * automated generation code.
  */
 public class DefaultJmsProcessor implements JmsProcessor {
@@ -39,7 +39,7 @@ public class DefaultJmsProcessor implements JmsProcessor {
     JmsMessageLoggerHelper jmsMessageLoggerHelper;
 
     @Override
-    public void process(final Consumer<InterceptorContext> consumer, final Message message) {
+    public void process(final ISubscriptionManager subscriptionManager, final Message message) {
 
         traceLogger.trace(LOGGER, () -> format("Processing JMS message: %s", jmsMessageLoggerHelper.toJmsTraceString(message)));
 
@@ -54,7 +54,7 @@ public class DefaultJmsProcessor implements JmsProcessor {
 
         final JsonEnvelope jsonEnvelope = envelopeConverter.fromMessage((TextMessage) message);
         traceLogger.trace(LOGGER, () -> format("JMS message converted to envelope: %s", jsonEnvelope));
-        consumer.accept(interceptorContextWithInput(jsonEnvelope));
+        subscriptionManager.process(jsonEnvelope);
         traceLogger.trace(LOGGER, () -> format("JMS message processed: %s", jsonEnvelope));
     }
 }

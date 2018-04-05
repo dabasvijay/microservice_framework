@@ -25,7 +25,6 @@ import static uk.gov.justice.services.core.annotation.Component.COMMAND_CONTROLL
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_HANDLER;
 import static uk.gov.justice.services.core.annotation.Component.EVENT_LISTENER;
 import static uk.gov.justice.services.core.annotation.Component.EVENT_PROCESSOR;
-import static uk.gov.justice.services.core.interceptor.DefaultInterceptorContext.interceptorContextWithInput;
 import static uk.gov.justice.services.generators.test.utils.config.GeneratorConfigUtil.configurationWithBasePackage;
 import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.methodsOf;
 import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
@@ -43,9 +42,7 @@ import uk.gov.justice.services.adapter.messaging.JmsProcessor;
 import uk.gov.justice.services.adapter.messaging.JsonSchemaValidationInterceptor;
 import uk.gov.justice.services.core.annotation.Adapter;
 import uk.gov.justice.services.core.annotation.Component;
-import uk.gov.justice.services.core.interceptor.InterceptorChainProcessor;
-import uk.gov.justice.services.core.interceptor.InterceptorContext;
-import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.justice.services.event.sourcing.subscription.SubscriptionManager;
 import uk.gov.justice.services.test.utils.core.compiler.JavaCompilerUtil;
 import uk.gov.justice.subscription.domain.Event;
 import uk.gov.justice.subscription.domain.Subscription;
@@ -59,7 +56,6 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.List;
-import java.util.function.Consumer;
 
 import javax.ejb.ActivationConfigProperty;
 import javax.ejb.MessageDriven;
@@ -79,7 +75,6 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.slf4j.Logger;
@@ -88,7 +83,7 @@ import org.slf4j.Logger;
 public class SubscriptionJmsEndpointGeneratorTest {
     private static final String BASE_PACKAGE = "uk.test";
     private static final String BASE_PACKAGE_FOLDER = "/uk/test";
-    private static final String INTERCEPTOR_CHAIN_PROCESSOR = "interceptorChainProcessor";
+    private static final String SUBSCRIPTION_MANAGER = "subscriptionManager";
 
     @Rule
     public TemporaryFolder outputFolder = new TemporaryFolder();
@@ -100,7 +95,7 @@ public class SubscriptionJmsEndpointGeneratorTest {
     JmsProcessor jmsProcessor;
 
     @Mock
-    InterceptorChainProcessor interceptorChainProcessor;
+    SubscriptionManager subscriptionManager;
 
     private GeneratorProperties generatorProperties;
     private  JavaCompilerUtil compiler;
@@ -361,17 +356,17 @@ public class SubscriptionJmsEndpointGeneratorTest {
     }
 
     @Test
-    public void shouldCreateJmsEndpointWithAnnotatedInterceptorChainProcessorProperty() throws Exception {
+    public void shouldCreateJmsEndpointWithAnnotatedSubscriptionManagerProperty() throws Exception {
 
         SubscriptionDescriptor subscriptionDescriptor = setUpMessageSubscription("jms:topic:somecontext.controller.command", "somecontext.command1", serviceName, componentName);
 
         generator.run(subscriptionDescriptor, configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties));
 
         Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "ContextEventProcessorSomecontextControllerCommandJmsListener");
-        Field chainProcessField = clazz.getDeclaredField(INTERCEPTOR_CHAIN_PROCESSOR);
+        Field chainProcessField = clazz.getDeclaredField(SUBSCRIPTION_MANAGER);
         assertThat(chainProcessField, not(nullValue()));
-        assertThat(chainProcessField.getType(), CoreMatchers.equalTo((InterceptorChainProcessor.class)));
-        assertThat(chainProcessField.getAnnotations(), arrayWithSize(1));
+        assertThat(chainProcessField.getType(), CoreMatchers.equalTo((SubscriptionManager.class)));
+        assertThat(chainProcessField.getAnnotations(), arrayWithSize(2));
         assertThat(chainProcessField.getAnnotation(Inject.class), not(nullValue()));
     }
 
@@ -639,14 +634,7 @@ public class SubscriptionJmsEndpointGeneratorTest {
         Message message = mock(Message.class);
         jmsListener.onMessage(message);
 
-        ArgumentCaptor<Consumer> consumerCaptor = ArgumentCaptor.forClass(Consumer.class);
-        verify(jmsProcessor).process(consumerCaptor.capture(), eq(message));
-
-        JsonEnvelope envelope = mock(JsonEnvelope.class);
-        final InterceptorContext interceptorContext = interceptorContextWithInput(envelope);
-        consumerCaptor.getValue().accept(interceptorContext);
-
-        verify(interceptorChainProcessor).process(interceptorContext);
+        verify(jmsProcessor).process(eq(subscriptionManager), eq(message));
     }
 
     @Test
@@ -730,7 +718,7 @@ public class SubscriptionJmsEndpointGeneratorTest {
     private Object instantiate(Class<?> resourceClass) throws InstantiationException, IllegalAccessException {
         Object resourceObject = resourceClass.newInstance();
         setField(resourceObject, "jmsProcessor", jmsProcessor);
-        setField(resourceObject, INTERCEPTOR_CHAIN_PROCESSOR, interceptorChainProcessor);
+        setField(resourceObject, SUBSCRIPTION_MANAGER, subscriptionManager);
         return resourceObject;
     }
 

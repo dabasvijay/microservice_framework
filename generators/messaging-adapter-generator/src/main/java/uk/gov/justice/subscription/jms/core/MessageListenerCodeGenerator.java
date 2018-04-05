@@ -16,7 +16,8 @@ import uk.gov.justice.services.adapter.messaging.JmsLoggerMetadataInterceptor;
 import uk.gov.justice.services.adapter.messaging.JmsProcessor;
 import uk.gov.justice.services.adapter.messaging.JsonSchemaValidationInterceptor;
 import uk.gov.justice.services.core.annotation.Adapter;
-import uk.gov.justice.services.core.interceptor.InterceptorChainProcessor;
+import uk.gov.justice.services.core.cdi.SubscriptionName;
+import uk.gov.justice.services.event.sourcing.subscription.SubscriptionManager;
 import uk.gov.justice.services.generators.commons.config.CommonGeneratorProperties;
 import uk.gov.justice.services.messaging.logging.LoggerUtils;
 import uk.gov.justice.subscription.domain.Event;
@@ -54,7 +55,7 @@ public class MessageListenerCodeGenerator {
     private static final String CLASS_NAME = "$T.class";
     private static final String DEFAULT_ANNOTATION_PARAMETER = "value";
     private static final String ACTIVATION_CONFIG_PARAMETER = "activationConfig";
-    private static final String INTERCEPTOR_CHAIN_PROCESS = "interceptorChainProcessor";
+    private static final String SUBSCRIPTION_MANAGER = "subscriptionManager";
     private static final String JMS_PROCESSOR_FIELD = "jmsProcessor";
     private static final String LOGGER_FIELD = "LOGGER";
 
@@ -115,8 +116,10 @@ public class MessageListenerCodeGenerator {
                             .addModifiers(PRIVATE, STATIC, FINAL)
                             .initializer("$T.getLogger($L.class)", LoggerFactory.class, className)
                             .build())
-                    .addField(FieldSpec.builder(ClassName.get(InterceptorChainProcessor.class), INTERCEPTOR_CHAIN_PROCESS)
-                            .addAnnotation(Inject.class)
+                    .addField(FieldSpec.builder(ClassName.get(SubscriptionManager.class), SUBSCRIPTION_MANAGER)
+                            .addAnnotation(Inject.class).addAnnotation(AnnotationSpec.builder(SubscriptionName.class)
+                                    .addMember(DEFAULT_ANNOTATION_PARAMETER, "$S", subscription.getName())
+                                    .build())
                             .build())
                     .addField(FieldSpec.builder(ClassName.get(JmsProcessor.class), JMS_PROCESSOR_FIELD)
                             .addAnnotation(Inject.class)
@@ -188,7 +191,7 @@ public class MessageListenerCodeGenerator {
                         .build())
                 .addCode(CodeBlock.builder()
                         .addStatement("$T.trace(LOGGER, () -> \"Received JMS message\")", LoggerUtils.class)
-                        .addStatement("$L.process($L::process, $L)", JMS_PROCESSOR_FIELD, INTERCEPTOR_CHAIN_PROCESS, messageFieldName)
+                        .addStatement("$L.process($L, $L)", JMS_PROCESSOR_FIELD, SUBSCRIPTION_MANAGER, messageFieldName)
                         .build())
                 .build();
     }

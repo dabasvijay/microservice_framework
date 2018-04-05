@@ -3,6 +3,7 @@ package uk.gov.justice.services.event.sourcing.subscription;
 import static java.lang.String.format;
 
 import uk.gov.justice.services.core.cdi.SubscriptionName;
+import uk.gov.justice.services.core.interceptor.InterceptorChainProcessor;
 import uk.gov.justice.services.eventsourcing.source.core.EventSource;
 import uk.gov.justice.subscription.domain.Subscription;
 
@@ -19,9 +20,12 @@ public class SubscriptionManagerProducer {
     @Inject
     @Any
     Instance<EventSource> eventsourceInstance;
-    
+
     @Inject
     SubscriptionDescriptorRegistry subscriptionDescriptorRegistry;
+
+    @Inject
+    InterceptorChainProcessor interceptorChainProcessor;
 
     @Inject
     QualifierAnnotationExtractor qualifierAnnotationExtractor;
@@ -32,12 +36,12 @@ public class SubscriptionManagerProducer {
         final SubscriptionName subscriptionName = qualifierAnnotationExtractor.getFrom(injectionPoint, SubscriptionName.class);
 
         final Instance<EventSource> eventSourceInstance = eventsourceInstance.select(subscriptionName);
-
+        System.out.println("subscription name ==" + subscriptionName.value());
         if(eventSourceInstance != null) {
             final EventSource eventSource = eventSourceInstance.get();
             final Subscription subscription = subscriptionDescriptorRegistry.getSubscription(subscriptionName.value());
 
-            return new SubscriptionManager(subscription, eventSource);
+            return new SubscriptionManager(subscription, eventSource, interceptorChainProcessor);
         }
 
         throw new SubscriptionManagerProducerException(format("Failed to find instance of event souce with Qualifier '%s'", subscriptionName.value()));

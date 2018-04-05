@@ -37,14 +37,17 @@ public class DefaultJmsProcessorTest {
     @Mock
     private TraceLogger traceLogger;
 
+    @Mock
+    private ISubscriptionManager subscriptionManager;
+
     @InjectMocks
     private DefaultJmsProcessor jmsProcessor;
 
     @Test
-    public void shouldPassValidMessageToConsumerFunction() throws Exception {
+    public void shouldProcessMessageWithSubscriptionManager() throws Exception {
         when(envelopeConverter.fromMessage(textMessage)).thenReturn(expectedEnvelope);
 
-        jmsProcessor.process(interceptorContext -> assertThat(interceptorContext.inputEnvelope(), is(expectedEnvelope)), textMessage);
+        jmsProcessor.process(subscriptionManager, textMessage);
     }
 
     @Test(expected = InvalildJmsMessageTypeException.class)
