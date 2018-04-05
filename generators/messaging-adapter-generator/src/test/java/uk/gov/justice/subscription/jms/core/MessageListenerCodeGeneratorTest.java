@@ -92,7 +92,7 @@ public class MessageListenerCodeGeneratorTest  {
                 "  private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(uk.gov.moj.base.package.name.MyContextEventListenerMyContextHandlerCommandJmsListener.class);\n" +
                 "\n" +
                 "  @javax.inject.Inject\n" +
-                "  @uk.gov.justice.services.core.cdi.SubscriptionName(\"subscription\")\n" +
+                "  @uk.gov.justice.services.core.cdi.SubscriptionName(\"My-contextHandlerCommand\")\n" +
                 "  uk.gov.justice.services.event.sourcing.subscription.SubscriptionManager subscriptionManager;\n" +
                 "\n" +
                 "  @javax.inject.Inject\n" +
@@ -167,7 +167,7 @@ public class MessageListenerCodeGeneratorTest  {
                 "  private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(uk.gov.moj.base.package.name.MyContextCommandHandlerMyContextHandlerCommandJmsListener.class);\n" +
                 "\n" +
                 "  @javax.inject.Inject\n" +
-                "  @uk.gov.justice.services.core.cdi.SubscriptionName(\"subscription\")\n" +
+                "  @uk.gov.justice.services.core.cdi.SubscriptionName(\"My-contextHandlerCommand\")\n" +
                 "  uk.gov.justice.services.event.sourcing.subscription.SubscriptionManager subscriptionManager;\n" +
                 "\n" +
                 "  @javax.inject.Inject\n" +
@@ -243,7 +243,7 @@ public class MessageListenerCodeGeneratorTest  {
                 "  private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(uk.gov.moj.base.package.name.MyContextCommandApiMyContextHandlerCommandJmsListener.class);\n" +
                 "\n" +
                 "  @javax.inject.Inject\n" +
-                "  @uk.gov.justice.services.core.cdi.SubscriptionName(\"subscription\")\n" +
+                "  @uk.gov.justice.services.core.cdi.SubscriptionName(\"My-contextHandlerCommand\")\n" +
                 "  uk.gov.justice.services.event.sourcing.subscription.SubscriptionManager subscriptionManager;\n" +
                 "\n" +
                 "  @javax.inject.Inject\n" +

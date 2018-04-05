@@ -3,6 +3,7 @@ package uk.gov.justice.subscription.jms.core;
 import static com.squareup.javapoet.TypeSpec.classBuilder;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.joining;
+import static java.util.stream.Stream.of;
 import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PUBLIC;
@@ -42,6 +43,7 @@ import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeSpec;
+import org.apache.commons.lang3.StringUtils;
 import org.jboss.ejb3.annotation.Pool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -118,7 +120,7 @@ public class MessageListenerCodeGenerator {
                             .build())
                     .addField(FieldSpec.builder(ClassName.get(SubscriptionManager.class), SUBSCRIPTION_MANAGER)
                             .addAnnotation(Inject.class).addAnnotation(AnnotationSpec.builder(SubscriptionName.class)
-                                    .addMember(DEFAULT_ANNOTATION_PARAMETER, "$S", subscription.getName())
+                                    .addMember(DEFAULT_ANNOTATION_PARAMETER, "$S", createSubscriptionName(destinationFromJmsUri(subscription.getEventsource().getLocation().getJmsUri())))
                                     .build())
                             .build())
                     .addField(FieldSpec.builder(ClassName.get(JmsProcessor.class), JMS_PROCESSOR_FIELD)
@@ -291,5 +293,11 @@ public class MessageListenerCodeGenerator {
      */
     private String subscriptionNameOf(final String destination, final String clientId) {
         return format("%s.%s", clientId, destination);
+    }
+
+    private String createSubscriptionName(final String destinationName) {
+        return of(destinationName.split("[/.:]"))
+                .map(StringUtils::capitalize)
+                .collect(joining());
     }
 }

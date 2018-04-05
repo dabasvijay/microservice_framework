@@ -10,6 +10,9 @@ import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import uk.gov.justice.services.eventsourcing.source.core.EventSource;
+import uk.gov.justice.subscription.domain.Eventsource;
+import uk.gov.justice.subscription.domain.Location;
 import uk.gov.justice.subscription.domain.Subscription;
 import uk.gov.justice.subscription.domain.SubscriptionDescriptor;
 
@@ -60,16 +63,41 @@ public class SubscriptionDescriptorRegistryTest {
         final Subscription subscription_2_1 = mock(Subscription.class);
         final Subscription subscription_2_2 = mock(Subscription.class);
 
+        final Eventsource eventSource_1_1 = mock(Eventsource.class);
+        final Location location_1_1 = mock(Location.class);
+        when(location_1_1.getJmsUri()).thenReturn("jms:topic:example.event_1_1");
+        when(eventSource_1_1.getLocation()).thenReturn(location_1_1);
+
+        final Eventsource eventSource_1_2 = mock(Eventsource.class);
+        final Location location_1_2 = mock(Location.class);
+        when(location_1_2.getJmsUri()).thenReturn("jms:topic:example.event_1_2");
+        when(eventSource_1_2.getLocation()).thenReturn(location_1_2);
+
+        final Eventsource eventSource_2_1 = mock(Eventsource.class);
+        final Location location_2_1 = mock(Location.class);
+        when(location_2_1.getJmsUri()).thenReturn("jms:topic:example.event_2_1");
+        when(eventSource_2_1.getLocation()).thenReturn(location_2_1);
+
+        final Eventsource eventSource_2_2 = mock(Eventsource.class);
+        final Location location_2_2 = mock(Location.class);
+        when(location_2_2.getJmsUri()).thenReturn("jms:topic:example.event_2_2");
+        when(eventSource_2_2.getLocation()).thenReturn(location_2_2);
+
         final SubscriptionDescriptor subscriptionDescriptor_1 = mock(SubscriptionDescriptor.class);
         final SubscriptionDescriptor subscriptionDescriptor_2 = mock(SubscriptionDescriptor.class);
 
         when(subscriptionDescriptor_1.getSubscriptions()).thenReturn(asList(subscription_1_1, subscription_1_2));
         when(subscriptionDescriptor_2.getSubscriptions()).thenReturn(asList(subscription_2_1, subscription_2_2));
 
-        when(subscription_1_1.getName()).thenReturn("subscription_1_1");
-        when(subscription_1_2.getName()).thenReturn("subscription_1_2");
-        when(subscription_2_1.getName()).thenReturn("subscription_2_1");
-        when(subscription_2_2.getName()).thenReturn("subscription_2_2");
+        when(subscription_1_1.getEventsource()).thenReturn(eventSource_1_1);
+        when(subscription_1_2.getEventsource()).thenReturn(eventSource_1_2);
+        when(subscription_2_1.getEventsource()).thenReturn(eventSource_2_1);
+        when(subscription_2_2.getEventsource()).thenReturn(eventSource_2_2);
+
+        when(subscription_1_1.getName()).thenReturn("ExampleEvent_1_1");
+        when(subscription_1_2.getName()).thenReturn("ExampleEvent_1_2");
+        when(subscription_2_1.getName()).thenReturn("ExampleEvent_2_1");
+        when(subscription_2_2.getName()).thenReturn("ExampleEvent_2_2");
 
         final Map<String, SubscriptionDescriptor> registry = of(
                 "service_1", subscriptionDescriptor_1,
@@ -78,7 +106,7 @@ public class SubscriptionDescriptorRegistryTest {
 
         final SubscriptionDescriptorRegistry subscriptionDescriptorRegistry = new SubscriptionDescriptorRegistry(registry);
 
-        assertThat(subscriptionDescriptorRegistry.getSubscription("subscription_2_1"), is(subscription_2_1));
+        assertThat(subscriptionDescriptorRegistry.getSubscription("ExampleEvent_2_1"), is(subscription_2_1));
     }
 
     @Test
@@ -91,11 +119,22 @@ public class SubscriptionDescriptorRegistryTest {
         final Subscription subscription_2_1 = mock(Subscription.class);
         final Subscription subscription_2_2 = mock(Subscription.class);
 
+        final Eventsource eventSource = mock(Eventsource.class);
+        final Location location = mock(Location.class);
+
+        when(eventSource.getLocation()).thenReturn(location);
+        when(location.getJmsUri()).thenReturn("jms:topic:example.event");
+
         final SubscriptionDescriptor subscriptionDescriptor_1 = mock(SubscriptionDescriptor.class);
         final SubscriptionDescriptor subscriptionDescriptor_2 = mock(SubscriptionDescriptor.class);
 
         when(subscriptionDescriptor_1.getSubscriptions()).thenReturn(asList(subscription_1_1, subscription_1_2));
         when(subscriptionDescriptor_2.getSubscriptions()).thenReturn(asList(subscription_2_1, subscription_2_2));
+
+        when(subscription_1_1.getEventsource()).thenReturn(eventSource);
+        when(subscription_1_2.getEventsource()).thenReturn(eventSource);
+        when(subscription_2_1.getEventsource()).thenReturn(eventSource);
+        when(subscription_2_2.getEventsource()).thenReturn(eventSource);
 
         when(subscription_1_1.getName()).thenReturn("subscription_1_1");
         when(subscription_1_2.getName()).thenReturn("subscription_1_2");
