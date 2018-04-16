@@ -114,6 +114,7 @@ public class JmsEndpointGeneratorTest {
         compiler = new JavaCompilerUtil(outputFolder.getRoot(), outputFolder.getRoot());
         generator = new JmsEndpointGenerator();
         generatorProperties = new GeneratorPropertiesFactory().withDefaultServiceComponent();
+
     }
 
     @Test

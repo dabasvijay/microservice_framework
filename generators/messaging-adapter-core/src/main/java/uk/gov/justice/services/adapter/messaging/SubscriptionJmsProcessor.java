@@ -21,12 +21,12 @@ import org.slf4j.LoggerFactory;
 /**
  * In order to minimise the amount of generated code in the JMS Listener implementation classes,
  * this service encapsulates all the logic for validating a message and converting it to an
- * envelope, passing it to a subscription manager to manage the message.  This allows testing of this logic independently from the
- * automated generation code.
+ * envelope, passing it to a subscription manager to manage the message.  This allows testing of
+ * this logic independently from the automated generation code.
  */
-public class DefaultJmsProcessor implements JmsProcessor {
+public class SubscriptionJmsProcessor implements JmsProcessor {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DefaultJmsProcessor.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SubscriptionJmsProcessor.class);
 
     @Inject
     EnvelopeConverter envelopeConverter;
@@ -36,6 +36,9 @@ public class DefaultJmsProcessor implements JmsProcessor {
 
     @Inject
     JmsMessageLoggerHelper jmsMessageLoggerHelper;
+
+    @Inject
+    ISubscriptionManager subscriptionManager;
 
     @Override
     public void process(final Consumer<InterceptorContext> consumer, final Message message) {
