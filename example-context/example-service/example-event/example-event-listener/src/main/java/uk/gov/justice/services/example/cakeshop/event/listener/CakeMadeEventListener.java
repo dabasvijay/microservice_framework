@@ -8,6 +8,9 @@ import uk.gov.justice.services.example.cakeshop.persistence.CakeRepository;
 import uk.gov.justice.services.example.cakeshop.persistence.entity.Cake;
 import uk.gov.justice.services.messaging.Envelope;
 
+import java.util.Optional;
+import java.util.UUID;
+
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -29,6 +32,16 @@ public class CakeMadeEventListener {
         //Best practice is to handle a value object rather than an entity
         //because the event typically would not cover an entire entity.
         //But we have not here as this example is so simple.
+
+
+        final Optional<UUID> uuidOptional = envelope.metadata().streamId();
+
+        if(uuidOptional.isPresent()) {
+            System.out.println("StreamId: >>>>> " + uuidOptional.get());
+        } else {
+            System.out.println("StreamId: >>>>> NOT PRESENT");
+        }
+
         cakeRepository.save(envelope.payload());
     }
 }

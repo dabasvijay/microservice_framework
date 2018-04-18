@@ -7,6 +7,9 @@ import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
+import java.util.Optional;
+import java.util.UUID;
+
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -23,6 +26,7 @@ public class RecipeAddedEventProcessor {
     @Handles("example.recipe-added")
     public void recipeAdded(final JsonEnvelope event) {
         LOGGER.info("=============> Inside recipe-added Event Processor");
+
         sender.send(event);
 
     }
